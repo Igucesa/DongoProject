@@ -62,6 +62,11 @@ public class PlayerControl : MonoBehaviour
         rb.velocity = moveInput;
 
         transform.eulerAngles = rb.velocity.x != 0 ? (rb.velocity.x < 0 ? Vector2.up * 180 : Vector2.zero) : transform.eulerAngles;
+
+        if(inGround)
+        {
+            anim.SetBool("Run", rb.velocity != Vector2.zero);
+        }
     }
 
     void Jumping()
@@ -71,10 +76,12 @@ public class PlayerControl : MonoBehaviour
             if(Input.GetKeyDown(KeyCode.Space))
             {
                 rb.velocity = new Vector2(rb.velocity.x, 0);
+                anim.SetBool("IsJumping", true);
                 rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             }
         }
     }
+
 #endregion
 
 #region Parry
@@ -85,11 +92,6 @@ public class PlayerControl : MonoBehaviour
         { 
             anim.SetTrigger("Parry");
         }
-    }
-
-    public void InParry()
-    {
-        StartCoroutine(InParryCoroutine());
     }
 
     public void StartParry()
@@ -103,12 +105,7 @@ public class PlayerControl : MonoBehaviour
     }
 
 #endregion
-    IEnumerator InParryCoroutine()
-    {
-        inParry = true;
-        yield return new WaitForSeconds(0.35f);
-        inParry = false;
-    }
+   
 
     void OnTriggerEnter2D(Collider2D other) {
         if(other.gameObject.tag == "Bullet")
@@ -124,8 +121,6 @@ public class PlayerControl : MonoBehaviour
             life--;
         }    
     }
-
-#region oldParry
    void DeflectBullet(Transform bulletTransform)
 {
     float horizontal = Input.GetAxisRaw("Horizontal");
@@ -151,21 +146,19 @@ public class PlayerControl : MonoBehaviour
     
     IEnumerator ParryKnockBack()
     {
-        Quaternion knockDir = Quaternion.Euler(0, 0, Mathf.Atan2(-direction.y, -direction.x) * Mathf.Rad2Deg);
         if(!inGround) {
             inKnockBack = true;
             jumpForce = 0;
         speed = 0;
         rb.velocity = Vector2.zero;
-         rb.AddForce(-direction * knockBack, ForceMode2D.Impulse);
-          yield return new WaitForSeconds(1f);
+        rb.AddForce(-direction * knockBack, ForceMode2D.Impulse);
+        yield return new WaitForSeconds(1f);
         inKnockBack = false;
         jumpForce = maxJumpForce;
         speed = maxSpeed;
         }
     }
 }
-#endregion
 #endregion
 
 }
