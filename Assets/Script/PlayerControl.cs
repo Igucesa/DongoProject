@@ -56,6 +56,7 @@ public class PlayerControl : MonoBehaviour
 #region MoveAndJump
     void Movement()
     {
+        
         moveInput.x = Input.GetAxisRaw("Horizontal") * speed;
         moveInput.y = rb.velocity.y;
 
@@ -96,12 +97,15 @@ public class PlayerControl : MonoBehaviour
 
     public void StartParry()
     {
+        if(inParry) return;
         inParry = true;
+        Debug.Log("parry começou");
     }
 
     public void StopParry()
     {
         inParry = false;
+        Debug.Log("parry parou");
     }
 
 #endregion
@@ -110,14 +114,16 @@ public class PlayerControl : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other) {
         if(other.gameObject.tag == "Bullet")
         {
-            Destroy(other.gameObject);
+            
             if(inParry)
             {
                 Transform bulletTransform = other.gameObject.GetComponent<Transform>();
-                
+                Destroy(other.gameObject);
                 DeflectBullet(bulletTransform);
                 return;
             }
+            if(other.GetComponent<BulletScript>().fromPlayer) return;
+            Destroy(other.gameObject);
             life--;
         }    
     }
@@ -135,17 +141,21 @@ public class PlayerControl : MonoBehaviour
         GameObject bullet = Instantiate(bulletPrefab, bulletTransform.position, Quaternion.identity); 
 
         bullet.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+        bullet.GetComponent<BulletScript>().fromPlayer = true;
 
         Rigidbody2D brb = bullet.GetComponent<Rigidbody2D>();
         if (brb != null)
         {
+            //imagine this being a playerbullet speed
             brb.velocity = direction * Time.deltaTime; 
+            //brb.AddForce(direction * bullet.GetComponent<BulletScript>().speed * Time.deltaTime); 
         }
          StartCoroutine(ParryKnockBack());
     }
     
     IEnumerator ParryKnockBack()
     {
+       // Quaternion knockDir = Quaternion.Euler(0, 0, Mathf.Atan2(-direction.y, -direction.x) * Mathf.Rad2Deg);
         if(!inGround) {
             inKnockBack = true;
             jumpForce = 0;
