@@ -5,9 +5,17 @@ public class EnemyBehaviour : MonoBehaviour
 {
     Animator anim;
     Transform playerPos;
+
+    bool playerFound;
+
+    [SerializeField] LayerMask player;
+
+    public float radius;
     
     [SerializeField] GameObject bulletPrefab;
    [SerializeField] int health = 5;
+
+   public bool shooter;
 
     void Awake()
     {
@@ -23,6 +31,12 @@ public class EnemyBehaviour : MonoBehaviour
     {
         playerPos = GameObject.Find("Player").GetComponent<Transform>();
         VerifyDead();
+
+        playerFound = Physics2D.OverlapCircle(transform.position, radius, player);
+    }
+
+    private void OnDrawGizmos() {
+        Gizmos.DrawWireSphere(transform.position, radius);
     }
 
     void VerifyDead()
@@ -48,10 +62,13 @@ public class EnemyBehaviour : MonoBehaviour
     {
         while(true)
         {
+            if(!playerFound) goto skip;
             anim.SetTrigger("Shoot");
             yield return new WaitForSeconds(0.4f);
             Shoot();
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(1.9f);
+            skip:
+            yield return new WaitForSeconds(0.1f);
 
         }
     }

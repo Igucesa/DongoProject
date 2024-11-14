@@ -11,6 +11,7 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] float knockBack;
     [SerializeField] float speed, jumpForce;
     Vector2 moveInput;
+    public float ray;
     public int life;
     [SerializeField] LayerMask layerGround;
     bool inGround;
@@ -37,8 +38,9 @@ public class PlayerControl : MonoBehaviour
     void Update()
     {
         VerifyBools();
-        Jumping();
+        if(inParry) return;
         Parry();
+        Jumping();
     }
 
     void FixedUpdate()
@@ -50,7 +52,7 @@ public class PlayerControl : MonoBehaviour
 
  void VerifyBools()
     {
-        inGround = Physics2D.OverlapCircle(foot.position, 0.3f, layerGround);
+        inGround = Physics2D.OverlapCircle(foot.position, 0.1f, layerGround);
     }
 
 #region MoveAndJump
@@ -66,7 +68,8 @@ public class PlayerControl : MonoBehaviour
 
         if(inGround)
         {
-            anim.SetBool("Run", rb.velocity != Vector2.zero);
+            
+            anim.SetBool("Run", rb.velocity.x != 0);
         }
     }
 
@@ -76,11 +79,14 @@ public class PlayerControl : MonoBehaviour
         {
             if(Input.GetKeyDown(KeyCode.Space))
             {
+                anim.SetTrigger("Jump");
                 rb.velocity = new Vector2(rb.velocity.x, 0);
-                anim.SetBool("IsJumping", true);
                 rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             }
         }
+                if(rb.velocity.y < -0.01f) anim.SetTrigger("Fall");
+                if(rb.velocity.y > 0) return;
+                if(inGround) anim.SetTrigger("InGround");
     }
 
 #endregion
