@@ -14,7 +14,7 @@ public class PlayerControl : MonoBehaviour
     public float ray;
     public int life;
     [SerializeField] LayerMask layerGround;
-    bool inGround;
+    public bool inGround;
     bool inKnockBack;
     Transform foot;
     Rigidbody2D rb;
@@ -38,15 +38,18 @@ public class PlayerControl : MonoBehaviour
     void Update()
     {
         VerifyBools();
+        //if(PauseScript.gamePause) return;
         if(inParry) return;
         Parry();
         Jumping();
+        
     }
 
     void FixedUpdate()
     {
-        if(inKnockBack) return;
+        //if(PauseScript.gamePause) return;
         Movement();
+        if(inKnockBack) return;
     }
     #endregion
 
@@ -70,8 +73,10 @@ public class PlayerControl : MonoBehaviour
         {
             
             anim.SetBool("Run", rb.velocity.x != 0);
-        }
+        } 
     }
+
+    
 
     void Jumping()
     {
@@ -133,6 +138,8 @@ public class PlayerControl : MonoBehaviour
             life--;
         }    
     }
+
+    
    void DeflectBullet(Transform bulletTransform)
 {
     float horizontal = Input.GetAxisRaw("Horizontal");

@@ -62,7 +62,8 @@ public class EnemyBehaviour : MonoBehaviour
     {
         while(true)
         {
-            if(!playerFound) goto skip;
+            
+            if(!playerFound || PauseScript.gamePause) goto skip;
             anim.SetTrigger("Shoot");
             yield return new WaitForSeconds(0.4f);
             Shoot();
